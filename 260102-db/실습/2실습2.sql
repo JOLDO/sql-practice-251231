@@ -20,6 +20,25 @@ SELECT * FROM EMP ORDER BY COMM DESC, SAL ASC;
 --     ELSE 0
 --   END, COMM DESC, SAL ASC;  --case는 null일때 1 아니면 0으로 만들어서 0이 먼저 정렬 되고, 1이 나중에 정렬된다. 그리고 내림차순을 해서 높은 값부터 나온다.
 -- 8)EMP 테이블에서 이름, 부서번호, 급여를 출력하되, 급여가 높은 순으로 정렬하시오.
+
 SELECT ENAME, DEPTNO, SAL FROM EMP ORDER BY SAL DESC;
 -- 9)SALGRADE 테이블에서 급여 등급(GRADE)을 오름차순, 최고급여(HISAL)는 내림차순으로 정렬하시오.
 SELECT * FROM SALGRADE ORDER BY GRADE ASC, HISAL DESC;
+
+-- 케이스 연습(IF문)
+-- SELECT DISTINCT 
+--     CASE WHEN COMM IS NULL THEN 0
+--     ELSE COMM 
+--     END 
+--     AS "상여금"
+--     FROM EMP;
+
+-- SELECT DISTINCT COMM AS "상여금" FROM EMP ORDER BY
+--     CASE WHEN COMM IS NULL THEN 1
+--     ELSE 0
+--     END, COMM DESC;
+
+-- SELECT DISTINCT COMM AS "상여금" FROM EMP ORDER BY
+--     CASE WHEN COMM IS NULL THEN 0
+--     ELSE 1
+--     END, COMM;
