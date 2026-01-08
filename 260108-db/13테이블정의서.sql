@@ -1,0 +1,62 @@
+-- 컬럼의 정의와 데이터타입 이랑 내용을 전반적인 내용을 작성
+-- 테이블에서 컬럼을 우클릭해서 설명을 적어놓으면 좋음
+
+-- 테이블 목록 추출
+-- 오라클 테이블 정의서 쿼리 라고 검색
+
+ SELECT S1.TABLE_NAME AS 물리테이블명,
+         COMMENTS AS 논리테이블명,
+         TABLESPACE_NAME AS 테이블스페이스명,
+         NUM_ROWS AS ROW수,     --- analize 를 해야 정확한 Row수를 얻는다.
+         LAST_ANALYZED AS  최종분석일자,
+         PARTITIONED AS 파티션여부
+FROM USER_TABLES S1,
+        USER_TAB_COMMENTS S2
+WHERE S1.TABLE_NAME = S2.TABLE_NAME       
+  AND S2.TABLE_TYPE  = 'TABLE'    -- VIEW (뷰, 테이블 따로 SELECT 
+  AND TABLESPACE_NAME IS NOT NULL --PLAN TABLE 등을 빼기 위해
+ORDER BY  S1.TABLE_NAME;
+
+ 
+
+-- 테이블, 컬럼 목록 추출
+
+ SELECT A.TABLE_NAME AS TABLE_NAME,
+   A.TAB_CMT AS 테이블설명,
+         A.COLUMN_NAME AS 컬럼명,
+         B.POS AS PK,
+         A.COL_CMT AS 컬럼설명,
+         A.DATA_TYPE AS 데이터유형,
+         A.데이터길이,
+         A.NULLABLE AS NULL여부,
+         A.COLUMN_ID AS 컬럼순서,
+         A.DATA_DEFAULT AS 기본값
+FROM
+(SELECT S1.TABLE_NAME,
+   S3.COMMENTS AS TAB_CMT,
+         S1.COLUMN_NAME,
+         S2.COMMENTS AS COL_CMT,
+         S1.DATA_TYPE,
+         CASE WHEN S1.DATA_PRECISION IS NOT NULL THEN DATA_PRECISION||','||DATA_SCALE
+         ELSE TO_CHAR(S1.DATA_LENGTH)
+         END  AS 데이터길이,
+         NULLABLE,
+         COLUMN_ID,
+         DATA_DEFAULT
+FROM  USER_TAB_COLUMNS S1,
+         USER_COL_COMMENTS S2,
+         USER_TAB_COMMENTS S3
+WHERE S1.TABLE_NAME = S2.TABLE_NAME
+   AND S1.COLUMN_NAME = S2.COLUMN_NAME
+   AND S2.TABLE_NAME = S3.TABLE_NAME ) A,        
+(SELECT T1.TABLE_NAME, T2.COLUMN_NAME, 'PK'||POSITION AS POS
+   FROM (SELECT TABLE_NAME, CONSTRAINT_NAME  
+              FROM USER_CONSTRAINTS
+                  WHERE  CONSTRAINT_TYPE = 'P' )T1,
+                  (SELECT TABLE_NAME, CONSTRAINT_NAME,  COLUMN_NAME, POSITION
+                 FROM USER_CONS_COLUMNS ) T2
+          WHERE T1.TABLE_NAME = T2.TABLE_NAME
+             AND T1.CONSTRAINT_NAME = T2.CONSTRAINT_NAME  ) B
+WHERE A.TABLE_NAME = B.TABLE_NAME(+)
+   AND A.COLUMN_NAME = B.COLUMN_NAME(+)    
+ORDER BY A.TABLE_NAME,  A.COLUMN_ID;
