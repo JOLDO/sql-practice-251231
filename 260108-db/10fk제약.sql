@@ -32,3 +32,11 @@ SELECT * from emp_fk;
 
 delete from dept_fk where deptno = 10;
 -- 이미 사용중인 fk의 값이라서 삭제 불가
+
+START TRANSACTION;  --트랜잭션 시작
+select * from emp for update;   --동시성 막음
+
+select count(empno) from emp;
+
+insert into emp (empno) values (9999); 
+commit; --트랜잭션 끝
